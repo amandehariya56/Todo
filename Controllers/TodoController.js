@@ -15,43 +15,55 @@ const getTodos = async (req, res) => {
 const postdata = async (req, res) => {
   const { title, description, completed } = req.body;
 
+  if (!title || !description) {
+    return res.status(400).json({ message: "Title and description are required" });
+  }
+
   try {
     const newTodo = new Todo({
       title,
       description,
-      completed,
+      completed: completed || false, // default completed to false if not provided
     });
 
     const savedTodo = await newTodo.save();
     res.json(savedTodo);
   } catch (err) {
     console.error(err);
-    res.status(400).json({ message: "Error saving todo" });
+    res.status(500).json({ message: "Error saving todo" });
   }
 };
 
 // Update Todo
-const toggleStatus = async (id, currentStatus) => {
+const updatedata = async (req, res) => {
+    const { id } = req.params;
+    const { title, description, completed } = req.body;
+  
+    // Validate input data
+    if (!title || !description) {
+      return res.status(400).json({ message: "Title and description are required" });
+    }
+  
     try {
-      const updatedTodo = { completed: currentStatus === "YES" ? "NO" : "YES" };
-      const response = await axios.patch(`${VITE_API_URL}/updatedata/${id}`, updatedTodo);
-      console.log("Updated todo:", response.data);
-      // Handle success (e.g., refresh the todo list)
-    } catch (error) {
-      console.error("Error updating todo:", error);
+      const updatedTodo = await Todo.findByIdAndUpdate(id, { title, description, completed }, { new: true });
+      res.json(updatedTodo);
+    } catch (err) {
+      console.error(err);
+      res.status(400).json({ message: "Error updating todo" });
     }
   };
   
-  // Delete Todo
-  const deleteTodo = async (id) => {
-    try {
-      const response = await axios.delete(`${VITE_API_URL}/deletedata/${id}`);
-      console.log("Deleted todo:", response.data);
-      // Handle success (e.g., refresh the todo list)
-    } catch (error) {
-      console.error("Error deleting todo:", error);
-    }
-  };
-  
+// Delete Todo
+const deletedata = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedTodo = await Todo.findByIdAndDelete(id);
+    res.json({ message: "Todo deleted", deletedTodo });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "Error deleting todo" });
+  }
+};
 
 module.exports = { getTodos, postdata, updatedata, deletedata };

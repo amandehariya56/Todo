@@ -3,16 +3,15 @@ const mongoose = require("mongoose");
 const TodoSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: true,  // Title is required
   },
   description: {
     type: String,
-    required: true,
+    required: true,  // Description is required
   },
   completed: {
-    type: String,
-    enum: ["YES", "NO"],
-    default: "NO",
+    type: Boolean,   // Completed is a boolean value
+    default: false,  // Default value is false
   },
 });
 
